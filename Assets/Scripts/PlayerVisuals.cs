@@ -1,0 +1,49 @@
+using UnityEngine;
+using System.Collections;
+
+public class PlayerVisuals : MonoBehaviour {
+    private SpriteRenderer playerSpriteRenderer;
+    private Color hitColor = Color.red;
+    private float hitEffectDuration = 0.2f;
+
+    private Color originalColor;
+
+    void Awake() {
+        if (playerSpriteRenderer == null) {
+            playerSpriteRenderer = GetComponent<SpriteRenderer>();
+            if (playerSpriteRenderer == null) {
+                Debug.LogError("PlayerVisuals: SpriteRenderer를 찾을 수 없습니다!", this);
+                enabled = false;
+                return;
+            }
+        }
+    }
+
+    void Start() {
+        originalColor = playerSpriteRenderer.color;
+    }
+
+    void OnEnable() {
+        if (GameManager.Instance != null) {
+            GameManager.Instance.OnPlayerDamaged += HandlePlayerDamaged;
+        }
+    }
+
+    void OnDisable() {
+        if (GameManager.Instance != null) {
+            GameManager.Instance.OnPlayerDamaged -= HandlePlayerDamaged;
+        }
+    }
+
+    private void HandlePlayerDamaged() {
+        StopAllCoroutines();
+        StartCoroutine(HitEffectCoroutine());
+    }
+
+    // 피격 시 깜빡이는 효과를 관리하는 코루틴
+    private IEnumerator HitEffectCoroutine() {
+        playerSpriteRenderer.color = hitColor;
+        yield return new WaitForSeconds(hitEffectDuration);
+        playerSpriteRenderer.color = originalColor;
+    }
+}
