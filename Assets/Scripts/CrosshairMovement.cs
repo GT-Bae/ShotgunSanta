@@ -1,3 +1,7 @@
+/*
+ * マウスを追従するCrosshairを制御するクラス
+ */
+
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;

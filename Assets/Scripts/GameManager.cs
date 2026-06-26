@@ -1,3 +1,7 @@
+/*
+ * プレイヤーの体力制御およびゲームオーバー制御
+ */
+
 using UnityEngine;
 using System;
 using System.Collections;
@@ -48,7 +52,7 @@ public class GameManager : MonoBehaviour {
             gameOverUI.SetActive(false);
         }
 
-        // 초기 체력 이벤트를 호출하여 UI를 초기화합니다.
+        // 初期体力イベントを呼び出して UI を初期化します。
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
 
@@ -88,12 +92,11 @@ public class GameManager : MonoBehaviour {
     }
 
     /// <summary>
-    /// 플레이어의 체력을 변경하고 관련 로직(무적, 사망)을 처리합니다.
-    /// 이 메서드는 GameManager에 중앙 집중화되어 있습니다.
+    /// プレイヤーの体力を変更し、関連するロジック（無敵、死亡）を処理します。
     /// </summary>
-    /// <param name="amount">변경할 체력 양 (음수: 데미지, 양수: 회복)</param>
+    /// <param name="amount">変更する体力量（負数: ダメージ、正数: 回復）</param>
     public void ChangeHealth(float amount) {
-        // isGameOver 상태 및 무적 상태 체크
+        // isGameOver 状態および無敵状態をチェック
         if (amount < 0 && (isInvincible || isGameOver)) {
             return;
         }
@@ -106,7 +109,7 @@ public class GameManager : MonoBehaviour {
             StartCoroutine(InvincibilityCoroutine());
         }
 
-        // 체력 변경 이벤트를 호출하여 UI를 업데이트합니다.
+        // 体力変更イベントを呼び出して UI を更新します
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
 
         if (currentHealth <= 0 && !isGameOver) {
@@ -127,7 +130,7 @@ public class GameManager : MonoBehaviour {
             gameOverUI.SetActive(true);
         }
 
-        // 플레이어 및 핵심 스크립트 비활성화
+        // プレイヤーおよび主要スクリプトを無効化
         if (playerMovement != null && playerRigidbody != null) {
             playerRigidbody.linearVelocity = Vector2.zero;
             playerRigidbody.angularVelocity = 0f;
@@ -137,7 +140,7 @@ public class GameManager : MonoBehaviour {
         if (bossPatternScript != null) bossPatternScript.enabled = false;
         if (handgunScript != null) handgunScript.enabled = false;
 
-        // 애니메이션 및 사운드 재생
+        // アニメーターおよびサウンド再生
         if (targetAnimator != null) {
             targetAnimator.SetTrigger("IsDie");
         }

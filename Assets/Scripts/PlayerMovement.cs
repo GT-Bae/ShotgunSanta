@@ -1,3 +1,7 @@
+/*
+ * プレイヤーの移動を制御するクラス
+ */
+
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
@@ -22,7 +26,7 @@ public class PlayerMovement : MonoBehaviour {
             GameManager.Instance.playerRigidbody = rb;
             GameManager.Instance.targetAnimator = animator;
         } else {
-            Debug.LogError("GameManager 인스턴스를 찾을 수 없습니다. 게임 흐름 제어에 문제가 발생할 수 있습니다.");
+            Debug.LogError("GameManager のインスタンスが見つかりません");
         }
     }
 
@@ -51,11 +55,11 @@ public class PlayerMovement : MonoBehaviour {
         if (isMoving) {
             rb.linearVelocity = moveDirection.normalized * speed;
         } else {
-            // 멈춰 있을 때 속도를 0으로 설정하여 미끄러짐 방지
+            // 停止中は速度を 0 に設定して滑りを防止
             rb.linearVelocity = Vector2.zero;
         }
         
-        // 좌우 반전
+        // 左右反転
         if (xInput < 0) {
             playerSpriteRenderer.flipX = true;
         } else if (xInput > 0) {
@@ -72,18 +76,18 @@ public class PlayerMovement : MonoBehaviour {
         float yInput = Input.GetAxisRaw("Vertical");
         Vector2 dodgeDirection = new Vector2(xInput, yInput).normalized;
 
-        // 입력이 없을 경우 마지막 속도 또는 스프라이트 방향으로 회피
+        // 入力がない場合は、最後の速度またはスプライトの向きに基づいて回避
         if (dodgeDirection == Vector2.zero) {
             if (rb.linearVelocity.sqrMagnitude > 0.01f) {
                 dodgeDirection = rb.linearVelocity.normalized;
             } else {
-                // flipX가 true면 왼쪽, false면 오른쪽
+                // flipX が true の場合は左、false の場合は右
                 dodgeDirection = playerSpriteRenderer.flipX ? Vector2.left : Vector2.right;
             }
         }
         rb.linearVelocity = dodgeDirection * dodgeForce;
 
-        // 좌우 반전
+        // 左右反転
         if (dodgeDirection.x != 0) {
             playerSpriteRenderer.flipX = dodgeDirection.x < 0;
         }
@@ -96,7 +100,7 @@ public class PlayerMovement : MonoBehaviour {
         rb.linearVelocity = Vector2.zero;
     }
 
-    // 데미지 처리
+    // ダメージ処理
     public void TakeDamage(float damageAmount) {
         if (GameManager.Instance != null) {
             GameManager.Instance.ChangeHealth(-damageAmount);

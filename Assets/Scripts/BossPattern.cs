@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+﻿/*
+ * ボスの攻撃パターンを制御するクラス
+ */
+
+using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 public class BossPattern : MonoBehaviour {
     [Header("Prefabs")]
@@ -25,8 +28,8 @@ public class BossPattern : MonoBehaviour {
 
     [Header("AoE Settings (AoESquareFill.cs와 동기화)")]
     [SerializeField] private float aoeSize = 1.0f;
-    [SerializeField] private float aoeInitialDuration = 1.0f; // 경고 유지 시간
-    [SerializeField] private float aoeFadeDuration = 1.0f; // 사라지는 시간
+    [SerializeField] private float aoeInitialDuration = 1.0f; // 警告の維持時間
+    [SerializeField] private float aoeFadeDuration = 1.0f; // 消える時間
 
     private bool animationTriggeredThisCycle = false;
     private bool isSoundPlayedThisPattern = false;
@@ -35,7 +38,7 @@ public class BossPattern : MonoBehaviour {
     [SerializeField] private BossHealth bossHealth;
 
     [Header("Audio")]
-    [Tooltip("Shotgun Effect가 생성될 때 재생할 사운드 클립")]
+    [Tooltip("Shotgun Effectが生成される時に再生するサウンド")]
     public AudioClip shotgunSoundClip;
     public AudioClip sledSoundClip;
     public AudioClip bellSoundClip;
@@ -45,14 +48,14 @@ public class BossPattern : MonoBehaviour {
 
     private Animator animator;
     private bool isInvulnerable = false;
-    // 현재 메인 패턴 코루틴을 추적
+    // 現在メーンパターンコルーチンを追跡
     private Coroutine mainPatternCoroutine;
-    //현재 실행 중인 개별 패턴을 추적
+    // 現在実行中のパターンを追跡
     private Coroutine activeSubPatternCoroutine;
 
-    // 현재 패턴 페이즈를 나타내는 변수 
+    // 現在パターンのフェーズの変数
     private int currentPhase = 1;
-    private const float PHASE_TWO_THRESHOLD = 0.5f; // 체력 50% 임계값
+    private const float PHASE_TWO_THRESHOLD = 0.5f; // 体力50%感知のため
 
     public bool IsInvulnerable() {
         return isInvulnerable;
@@ -75,7 +78,7 @@ public class BossPattern : MonoBehaviour {
         }
     }
     
-    // Phase에 따라 패턴 진행
+    // フェーズによりパターン進行
     public IEnumerator MainPatternSequence(int phase) {
         while (true) {
             if (phase == 1) {
@@ -118,59 +121,59 @@ public class BossPattern : MonoBehaviour {
                 yield return new WaitForSeconds(1.0f);
             }
             
-            // phase 전환시 루프 종료
+            // フェーズ転換時ループ終了
             if (phase != currentPhase) {
-                Debug.Log($"페이즈가 {phase}에서 {currentPhase}로 전환됨. 현재 패턴 루프 종료.");
+                Debug.Log($"フェーズが{phase}から{currentPhase}に転換されました。現在パターンのループ終了。");
                 yield break;
             }
 
-            yield return null; // 다음 프레임까지 대기 (무한 루프 보호)
+            yield return null; // 次のフレームまで待つ (フリーズを防ぐため)
         }
     }
 
-    // 체력변화 감지하여 페이즈 전환
+    // 体力の変更を感知し、フェーズ転換
     private void HandleHealthChanged(float currentHealth, float maxHealth) {
         float healthPercentage = currentHealth / maxHealth;
 
         if (healthPercentage < PHASE_TWO_THRESHOLD && currentPhase == 1) {
-            // 현재 실행 중인 메인 패턴 루프 중지
+            // 現在実行中のメーンのループ中止
             if (mainPatternCoroutine != null) {
                 StopCoroutine(mainPatternCoroutine);
                 mainPatternCoroutine = null;
             }
 
-            // 현재 실행 중이던 개별 패턴 코루틴이 있다면 강제 종료
+            // 現在実行中のパターン中止
             if (activeSubPatternCoroutine != null) {
                 StopCoroutine(activeSubPatternCoroutine);
                 activeSubPatternCoroutine = null;
             }
 
-            // 애니메이터 정리
+            // アニメーター整理
             animator.SetBool("IsShooting", false);
             animator.SetBool("IsSledPattern", false);
             animator.SetBool("IsSnowPattern", false);
             animator.SetBool("IsBagPattern", false);
 
-            // 2페이즈 시작
+            // 2フェーズ開始
             currentPhase = 2;
             StartCoroutine(MainPatternSequence(2));
         }
     }
 
-    // aoeCountPerShot만큼 2초 간격으로 공격
+    // aoeCountPerShotの数だけ、2秒おきに攻撃
     public IEnumerator PatternShoot(int aoeCountPerShot = 30) {
         const int repeatCount = 5;
         const float targetPatternPeriod = 2.0f;
         animator.SetBool("IsShooting", true);
 
         for (int i = 0; i < repeatCount; i++) {
-            Debug.Log($"PatternShoot: {i + 1}/{repeatCount}회차 AoE 소환 시작. (주기 목표: {targetPatternPeriod}s)");
+            Debug.Log($"PatternShoot: {i + 1}/{repeatCount}目のAoE生成開始。(周期目標: {targetPatternPeriod}秒)");
             float actualPatternDuration = aoeInitialDuration + aoeFadeDuration;
             yield return StartCoroutine(ExecuteNonOverlappingAoEPattern(aoeCountPerShot));
             float delayBetweenShots = targetPatternPeriod - actualPatternDuration;
 
             if (delayBetweenShots > 0) {
-                Debug.Log($"PatternShoot: 다음 발사까지 {delayBetweenShots:F2}s 추가 대기.");
+                Debug.Log($"PatternShoot: 次の発射まで{delayBetweenShots:F2}秒追加で待つ。");
                 yield return new WaitForSeconds(delayBetweenShots);
             }
         }
@@ -178,10 +181,10 @@ public class BossPattern : MonoBehaviour {
         animator.SetBool("IsShooting", false);
     }
 
-    // 지정된 그리드 영역에 AoE를 동시에 생성하고, AoE 경고 직후 ShotgunEffect를 생성하는 패턴
+    // 指定したグリッド領域にAoEを同時生成し、AoEの警告直後にShotgunEffectを生成するパターン
     public IEnumerator ExecuteNonOverlappingAoEPattern(int numberOfAoEs) {
         List<Vector3> spawnPositions = GetUniqueWorldPositions(numberOfAoEs);
-        // Shotgun Effect가 터져야 할 시간 = AoE 경고 유지 시간
+        // Shotgun Effect が発動すべきタイミング = AoE警告の表示時間
         float effectTriggerDuration = aoeInitialDuration;
         animationTriggeredThisCycle = false;
         foreach (Vector3 worldPos in spawnPositions) {
@@ -194,9 +197,9 @@ public class BossPattern : MonoBehaviour {
         yield return new WaitForSeconds(totalAoeDuration);
     }
 
-    // AoE Initial Duration이 끝난 후 Shotgun Effect를 생성하는 개별 코루틴
-   private IEnumerator AoEFollowUp(Vector3 spawnWorldPosition, float triggerDelay) {
-        // AoE가 Initial Duration만큼 지속된 후 대기 종료 → 즉시 Shotgun Effect 생성
+    // AoE Initial Duration 終了後に Shotgun Effect を生成する個別コルーチン
+    private IEnumerator AoEFollowUp(Vector3 spawnWorldPosition, float triggerDelay) {
+        // AoEがInitial Durationの時間だけ出た後に待機終了→すぐにShotgun Effect生成
         yield return new WaitForSeconds(triggerDelay);
 
         SpawnShotgunEffect(spawnWorldPosition);
@@ -204,7 +207,7 @@ public class BossPattern : MonoBehaviour {
         if (animator != null && !animationTriggeredThisCycle) {
             animator.SetTrigger("ShootTrigger");
 
-            // 사운드 재생 (한 패턴에 한 번만)
+            // サウンド再生 (一度に一回のみ)
             if (audioSource != null && shotgunSoundClip != null) {
                 audioSource.PlayOneShot(shotgunSoundClip);
             }
@@ -213,7 +216,7 @@ public class BossPattern : MonoBehaviour {
         }
     }
 
-    // 지정된 개수만큼 겹치지 않는 랜덤 Cell 좌표를 가져와 World 좌표 리스트로 반환
+    // 指定した個数分の重複しないランダムなCell座標を取得し、World座標のリストとして返す
     private List<Vector3> GetUniqueWorldPositions(int count) {
 
         HashSet<Vector3Int> selectedCells = new HashSet<Vector3Int>();
@@ -225,13 +228,13 @@ public class BossPattern : MonoBehaviour {
         int maxY = maxCellBounds.y;
         int cellRange = (maxX - minX + 1) * (maxY - minY + 1);
 
-        // 요청한 개수가 전체 범위보다 크면 전체 범위까지만 소환
+        // 指定された数が全体の範囲より大きければ、全体の範囲の分だけ生成
         if (count > cellRange) {
             count = cellRange;
-            Debug.LogWarning($"요청된 AoE 개수({count})가 전체 그리드 영역({cellRange})보다 커서 최대치로 조정합니다.");
+            Debug.LogWarning($"要求されたAoE個数({count})が全体グリッド範囲({cellRange})より大きいため最大値に調整します。");
         }
 
-        // 중복되지 않는 위치를 찾을 때까지 반복
+        // 重複しない位置が見つかるまで繰り返す
         while (selectedCells.Count < count) {
             int randomX = Random.Range(minX, maxX + 1);
             int randomY = Random.Range(minY, maxY + 1);
@@ -246,7 +249,7 @@ public class BossPattern : MonoBehaviour {
         return worldPositions;
     }
 
-    // 지정된 월드 좌표에 ShotgunEffect 프리팹을 생성
+    // 指定したWorld座標にShotgunEffectプレハブを生成する
     private void SpawnShotgunEffect(Vector3 position) {
         if (shotgunEffectPrefab != null) {
             Instantiate(shotgunEffectPrefab, position, Quaternion.identity);
@@ -255,15 +258,10 @@ public class BossPattern : MonoBehaviour {
 
     public IEnumerator PatternSled() {
         const float delayBetweenSledShots = 2.0f;
-        const float shortDelay = 1.0f;
-
         float totalAoeDuration = aoeInitialDuration + aoeFadeDuration;
         float actualSledDelay = delayBetweenSledShots - totalAoeDuration;
-        float actualShortDelay = shortDelay - totalAoeDuration;
 
-        // 대기 시간이 0 이하인 경우 최소값(0) 보장
         actualSledDelay = Mathf.Max(0, actualSledDelay);
-        actualShortDelay = Mathf.Max(0, actualShortDelay);
 
         StartCoroutine(ExecuteSledShot(new int[] { 0, 2, }, false));
         yield return new WaitForSeconds(0.5f);
@@ -283,21 +281,16 @@ public class BossPattern : MonoBehaviour {
         StartCoroutine(ExecuteSledShot(new int[] { 1, 2, 3 }, false));
         yield return new WaitForSeconds(0.5f);
         StartCoroutine(ExecuteSledShot(new int[] { 0 }, true));
-        yield return new WaitForSeconds(totalAoeDuration); // AoE 완료 대기
-        Debug.Log("PatternSled: 패턴 종료.");
+        yield return new WaitForSeconds(totalAoeDuration); // AoE完了待機
+        Debug.Log("PatternSled: パターン終了。");
     }
 
     public IEnumerator PatternSled2() {
         const float delayBetweenSledShots = 2.0f;
-        const float shortDelay = 1.0f;
-
         float totalAoeDuration = aoeInitialDuration + aoeFadeDuration;
         float actualSledDelay = delayBetweenSledShots - totalAoeDuration;
-        float actualShortDelay = shortDelay - totalAoeDuration;
 
-        // 대기 시간이 0 이하인 경우 최소값(0) 보장
         actualSledDelay = Mathf.Max(0, actualSledDelay);
-        actualShortDelay = Mathf.Max(0, actualShortDelay);
 
         StartCoroutine(ExecuteSledShot(new int[] { 0, }, false));
         yield return new WaitForSeconds(0.2f);
@@ -321,7 +314,7 @@ public class BossPattern : MonoBehaviour {
         yield return new WaitForSeconds(totalAoeDuration + actualSledDelay);
     }
 
-    // Sled 패턴의 단일 샷 로직: 지정된 y축 행에 AoE를 생성하고, 사라진 후 Sled Effect를 생성합니다.
+    // Sledパターンの単発ショットロジック：指定したy軸の行にAoEを生成し、消えた後にSled Effectを生成します。
     private IEnumerator ExecuteSledShot(int[] relativeRows, bool reverseX, int aoeCountPerLine = 8) {
         List<Vector3> aoeSpawnPositions = new List<Vector3>();
         float effectTriggerDuration = aoeInitialDuration;
@@ -338,20 +331,20 @@ public class BossPattern : MonoBehaviour {
             int startX = minCellBounds.x;
             int endX = maxCellBounds.x;
 
-            // minCellBounds.x 부터 maxCellBounds.x 까지 모두 포함
+            // minCellBounds.x から maxCellBounds.x まですべて含む
             for (int x = startX; x <= endX; x++) {
                 Vector3Int cellPos = new Vector3Int(x, yCell, minCellBounds.z);
                 aoeSpawnPositions.Add(targetTilemap.GetCellCenterWorld(cellPos));
             }
 
-            // 2Sled Effect 시작 위치 계산 (경계 밖 한 칸)
+            // Sled Effect の開始位置を計算（境界の外側1マス）
             Vector3 sledSpawnWorldPos;
             if (reverseX) {
-                // 좌우 반전 (왼쪽으로 이동)
+                // 左右反転（左方向に移動）
                 Vector3Int cellPos = new Vector3Int(maxCellBounds.x + 1, yCell, minCellBounds.z);
                 sledSpawnWorldPos = targetTilemap.GetCellCenterWorld(cellPos);
             } else {
-                // 정방향 (오른쪽으로 이동)
+                // 正方向（右方向に移動）
                 Vector3Int cellPos = new Vector3Int(minCellBounds.x - 1, yCell, minCellBounds.z);
                 sledSpawnWorldPos = targetTilemap.GetCellCenterWorld(cellPos);
             }
@@ -367,20 +360,20 @@ public class BossPattern : MonoBehaviour {
         yield break;
     }
 
-    // AoE가 Initial Duration 이후 Sled Effect를 생성하는 개별 코루틴
+    // AoE が Initial Duration 後に Sled Effect を生成する個別コルーチン
     private IEnumerator AoEFollowUpWithSled(Vector3 spawnWorldPosition, float triggerDelay, bool reverseX) {
-        // AoE 경고 시간만큼 대기
+        // AoE警告時間ほど待機
         yield return new WaitForSeconds(triggerDelay);
         SpawnSledEffect(spawnWorldPosition, reverseX);
     }
 
-    // 지정된 월드 좌표에 SledEffect 프리팹을 생성하고 좌우 반전을 적용
+    // 指定した World 座標に SledEffect プレハブを生成し、左右反転を適用する
     private void SpawnSledEffect(Vector3 position, bool reverseX) {
         if (sledEffectPrefab != null) {
             GameObject sledInstance = Instantiate(sledEffectPrefab, position, Quaternion.identity);
 
             if (reverseX) {
-                // X축 스케일을 -1로 설정하여 좌우 반전
+                // X軸スケールを-1に設定して左右反転する
                 sledInstance.transform.localScale = new Vector3(
                     -sledInstance.transform.localScale.x,
                     sledInstance.transform.localScale.y,
@@ -394,18 +387,18 @@ public class BossPattern : MonoBehaviour {
         }
     }
 
-    // Snow 패턴의 AoE 소환 로직: 꼭짓점(4칸)을 제외한 모든 셀에 AoE를 생성
+    // SnowパターンのAoE召喚ロジック：四隅（4マス）を除くすべてのセルにAoEを生成
     private IEnumerator ExecuteSnowAoE() {
         List<Vector3> aoeSpawnPositions = new List<Vector3>();
         float effectTriggerDuration = aoeInitialDuration;
 
-        // 전체 그리드 범위 (X: -5 ~ 4, Y: -3 ~ 0)
+        // グリッド全体の範囲 (X: -5 ~ 4, Y: -3 ~ 0)
         int minX = minCellBounds.x;
         int maxX = maxCellBounds.x;
         int minY = minCellBounds.y;
         int maxY = maxCellBounds.y;
 
-        // 꼭짓점 좌표
+        // 四隅の座標
         // (minX, minY), (maxX, minY), (minX, maxY), (maxX, maxY)
         HashSet<Vector3Int> corners = new HashSet<Vector3Int> {
             new Vector3Int(minX, minY, 0),
@@ -414,7 +407,7 @@ public class BossPattern : MonoBehaviour {
             new Vector3Int(maxX, maxY, 0)
         };
 
-        // 꼭짓점을 제외한 모든 칸의 위치를 계산
+        // 四隅を除くすべてのマスの位置を計算する
         for (int y = minY; y <= maxY; y++) {
             for (int x = minX; x <= maxX; x++) {
                 Vector3Int cellPos = new Vector3Int(x, y, minCellBounds.z);
@@ -425,12 +418,12 @@ public class BossPattern : MonoBehaviour {
             }
         }
 
-        // AoE 생성
+        // AoE 生成
         foreach (Vector3 worldPos in aoeSpawnPositions) {
             GameObject aoeInstance = Instantiate(aoePrefab, worldPos, Quaternion.identity);
             aoeInstance.transform.localScale = new Vector3(aoeSize, aoeSize, 1f);
 
-            // Snow 패턴은 AoEFollowUpWithSnow를 사용하여, AoE가 사라진 후 데미지를 발생
+            // Snow パターンでは AoEFollowUpWithSnow を使用し、AoE が消えた後にダメージを発生させる
             StartCoroutine(AoEFollowUpWithSnow(worldPos, effectTriggerDuration, 30));
         }
 
@@ -438,27 +431,27 @@ public class BossPattern : MonoBehaviour {
         yield return new WaitForSeconds(totalAoeDuration);
     }
 
-    // AoE가 Initial Duration 이후 Snow 패턴의 데미지 효과를 생성하는 개별 코루틴
+    // AoE が Initial Duration 後に Snow パターンのダメージ効果を生成する個別コルーチン
     private IEnumerator AoEFollowUpWithSnow(Vector3 spawnWorldPosition, float triggerDelay, int damageAmount) {
-        // AoE 경고 시간만큼 대기
+        // AoE 警告時間だけ待機
         yield return new WaitForSeconds(triggerDelay);
         const float additionalDelay = 1.0f;
         yield return new WaitForSeconds(additionalDelay);
         if (!isSoundPlayedThisPattern) {
             if (audioSource != null && snowSoundClip != null) {
                 audioSource.PlayOneShot(snowSoundClip);
-                isSoundPlayedThisPattern = true; // 사운드 재생 후 플래그 설정
+                isSoundPlayedThisPattern = true;
             }
         }
         Instantiate(snowEffectAttackPrefab, spawnWorldPosition, Quaternion.identity);
     }
 
-    // Snow 패턴 코루틴: 꼭짓점을 제외한 AoE 소환, SnowPrefab 소환, 4초 대기 후 사운드 및 효과 종료.
+    // Snow パターンのコルーチン：四隅を除いて AoE を生成し、SnowPrefab を生成し、4秒待機後にサウンドと効果を終了する。
     public IEnumerator PatternSnow() {
         isSoundPlayedThisPattern = false;
         animator.SetBool("IsSnowPattern", true);
 
-        // Snow 프리팹 소환 (움직임은 프리팹 스크립트에서 알아서 처리)
+        // Snow プレハブを生成（移動はプレハブ側のスクリプトで処理）
         if (snowPrefab != null) {
             Instantiate(snowPrefab, transform.position, Quaternion.identity);
         }
@@ -469,7 +462,7 @@ public class BossPattern : MonoBehaviour {
         isSoundPlayedThisPattern = false;
     }
 
-    // 4개의 랜덤 칸에 AoE 경고 후 GiftBox 3개, BoomBox 1개 소환
+    // 4つのランダムのマスにAoE警告後プレゼント箱3つ, 爆発箱1つ生成する
     public IEnumerator PatternBoxBell() {
         const int totalBoxesToSpawn = 4;
         const int boomBoxCount = 1;
@@ -481,44 +474,44 @@ public class BossPattern : MonoBehaviour {
             audioSource.PlayOneShot(boxBellSoundClip);
         }
 
-        // AoE 소환 위치 4개
+        // AoE生成位置を4つ
         List<Vector3> spawnPositions = GetUniqueWorldPositions(totalBoxesToSpawn);
 
-        // AoE 패턴 실행 시간 계산
+        // AoEパターンの実行時間を計算
         float totalAoeDuration = aoeInitialDuration + aoeFadeDuration;
         float effectTriggerDuration = aoeInitialDuration;
 
         for (int i = 0; i < totalBoxesToSpawn; i++) {
             Vector3 worldPos = spawnPositions[i];
 
-            // AoE 생성
+            // AoE 生成
             GameObject aoeInstance = Instantiate(aoePrefab, worldPos, Quaternion.identity);
             aoeInstance.transform.localScale = new Vector3(aoeSize, aoeSize, 1f);
 
-            // 소환할 박스 종류 결정 (i=0일 때 BoomBox, 나머지는 GiftBox)
+            // 生成する箱の種類を決定 (i=0のときは爆発箱, それ以外はプレゼント箱)
             GameObject boxPrefabToSpawn = (i < boomBoxCount) ? boomBoxPrefab : giftBoxPrefab;
 
             StartCoroutine(AoEFollowUpWithBox(worldPos, effectTriggerDuration, boxPrefabToSpawn));
         }
 
-        // AoE 대기
+        // AoE 待機
         yield return new WaitForSeconds(totalAoeDuration);
     }
 
-    // AoE 이후 지정된 박스 프리팹을 생성하는 개별 코루틴
+    // AoEの後に指定した箱プレハブを生成する個別コルーチン
     private IEnumerator AoEFollowUpWithBox(Vector3 spawnWorldPosition, float triggerDelay, GameObject boxPrefab) {
-        // AoE 경고 시간만큼 대기
+        // AoE 警告時間だけ待機
         yield return new WaitForSeconds(triggerDelay);
 
-        // 박스 프리팹 생성
+        // 箱プリハブ生成
         if (boxPrefab != null) {
             Instantiate(boxPrefab, spawnWorldPosition, Quaternion.identity);
         }
     }
 
-    // 보따리 패턴
+    // Bag パターン
     public IEnumerator PatternBagDrop() {
-        // 애니메이션 & 무적 활성화
+        // アニメーターおよび無敵を活性化
         if (animator != null) {
             animator.SetBool("IsBagPattern", true);
         }
@@ -526,8 +519,8 @@ public class BossPattern : MonoBehaviour {
 
         float bagDropDelay = 0.5f;
 
-        // 정방향 Bag (오른쪽 끝 열 제외)
-        // AoE 소환 위치 획득 (minX ~ maxX-1)
+        // 正方向 Bag（右端の列を除く）
+        // AoE 召喚位置を取得 (minX ~ maxX-1)
         List<Vector3> aoePositions1 = GetPositionsExcludingColumns(minCellBounds.x, maxCellBounds.x - 1);
 
         StartCoroutine(ExecuteAoEWarning(aoePositions1));
@@ -540,8 +533,8 @@ public class BossPattern : MonoBehaviour {
         SpawnSantaBag(false);
         yield return new WaitForSeconds(1.0f);
 
-        // 역방향 Bag (왼쪽 끝 열 제외)
-        // AoE 소환 위치 획득 (minX+1 ~ maxX)
+        // 逆方向 Bag（左端の列を除く）
+        // AoE 召喚位置を取得 (minX+1 ~ maxX)
         List<Vector3> aoePositions2 = GetPositionsExcludingColumns(minCellBounds.x + 1, maxCellBounds.x);
 
         StartCoroutine(ExecuteAoEWarning(aoePositions2));
@@ -554,14 +547,14 @@ public class BossPattern : MonoBehaviour {
         SpawnSantaBag(true);
         yield return new WaitForSeconds(1.0f);
 
-        // 애니메이션 & 무적 해제
+        // アニメーターおよび無敵を解除
         if (animator != null) {
             animator.SetBool("IsBagPattern", false);
         }
         isInvulnerable = false;
     }
 
-    /// 지정된 X축 열 범위에 AoE 경고를 표시
+    // 指定したX軸の列範囲にAoE警告を表示
     private IEnumerator ExecuteAoEWarning(List<Vector3> spawnPositions) {
         float totalDuration = aoeInitialDuration + aoeFadeDuration;
         float effectTriggerDuration = aoeInitialDuration;
@@ -571,11 +564,11 @@ public class BossPattern : MonoBehaviour {
             aoeInstance.transform.localScale = new Vector3(aoeSize, aoeSize, 1f);
         }
 
-        // AoE 대기
+        // AoE 待機
         yield return new WaitForSeconds(totalDuration);
     }
 
-    // 지정된 X축 범위 내 모든 Cell의 World 위치를 반환
+    // 指定したX軸範囲内のすべてのCellのWorld位置を返す
     private List<Vector3> GetPositionsExcludingColumns(int startX, int endX) {
         List<Vector3> worldPositions = new List<Vector3>();
 
@@ -591,7 +584,7 @@ public class BossPattern : MonoBehaviour {
         return worldPositions;
     }
 
-    /// Santa Bag을 소환하고 이동 시작
+    // Santa Bagを生成して移動開始
     private void SpawnSantaBag(bool isXFlipped) {
         if (santaBagPrefab == null) return;
 
@@ -608,7 +601,7 @@ public class BossPattern : MonoBehaviour {
     }
 
 
-    // 여섯 번째 패턴: BigGiftBox를 소환하고 애니메이션을 켠 채 대기
+    // 6番目のパターン：BigGiftBox を召喚し、アニメーションを再生したまま待機
     public IEnumerator PatternThrowTheBigBox() {
         const float patternDuration = 3.0f;
 
@@ -621,13 +614,12 @@ public class BossPattern : MonoBehaviour {
 
         Instantiate(bigGiftBoxPrefab, spawnPosition, Quaternion.identity);
 
-        // BigGiftBox의 전체 패턴(scale 업, AoE 대기, 이동, 폭발)이 끝날 때까지 대기
+        // BigGiftBox の全体パターン（スケールアップ、AoE 待機、移動、爆発）が終わるまで待機
         yield return new WaitForSeconds(patternDuration);
 
-        // 애니메이션 종료
+        // アニメーター終了
         if (animator != null) {
             animator.SetBool("IsSnowPattern", false);
         }
     }
 }
-

@@ -1,4 +1,8 @@
-﻿using UnityEngine;
+﻿/*
+ * ボスを倒せた後で進行されるエンディングを制御するクラス
+ */
+
+using UnityEngine;
 using System.Collections;
 
 public class BossEndDIalog : MonoBehaviour {
@@ -14,7 +18,7 @@ public class BossEndDIalog : MonoBehaviour {
     public GameObject paperPrefab;
     public GameObject paperShowPrefab;
 
-    //인스턴스
+    //インスタンス
     private SpriteRenderer coalInstance;
     private SpriteRenderer paperInstance;
     private GameObject currentPaperInstance;
@@ -26,7 +30,7 @@ public class BossEndDIalog : MonoBehaviour {
     [SerializeField] private AudioClip disappearSound;
     [SerializeField] private AudioSource audioSource;
 
-    // 보스 피격 효과에 필요한 변수
+    // ボスが攻撃をくらった時のエフェクトに使う変数
     private SpriteRenderer bossSpriteRenderer;
     private Color bossOriginalColor;
     private Color hitColor = Color.red;
@@ -46,7 +50,7 @@ public class BossEndDIalog : MonoBehaviour {
             bossOriginalColor = bossSpriteRenderer.color;
         }
 
-        // 프리팹 인스턴스화 및 할당
+        // プレハブを作って設定する
         if (coalPrefab != null) {
             GameObject coalObj = Instantiate(coalPrefab, transform.position, Quaternion.identity);
             coalInstance = coalObj.GetComponent<SpriteRenderer>();
@@ -56,7 +60,7 @@ public class BossEndDIalog : MonoBehaviour {
             paperInstance = paperObj.GetComponent<SpriteRenderer>();
         }
 
-        // 초기 상태 설정
+        // 初期状態の設定
         if (santaObject != null) santaObject.gameObject.SetActive(false);
         if (coalInstance != null) coalInstance.gameObject.SetActive(false);
         if (paperInstance != null) paperInstance.gameObject.SetActive(false);
@@ -67,45 +71,45 @@ public class BossEndDIalog : MonoBehaviour {
 
     private IEnumerator ControlledDialogueFlow() {
         dialogManager.isAutoAdvanceEnabled = false;
-        dialogManager.StartDialog(); // 대사 1
+        dialogManager.StartDialog(); // 台詞 1
         yield return null;
 
         yield return WaitForUserClick();
-        dialogManager.AdvanceDialog(); // 대사 2
+        dialogManager.AdvanceDialog(); // 台詞 2
         yield return null;
 
         yield return WaitForUserClick();
-        dialogManager.AdvanceDialog(); // 대사 3
+        dialogManager.AdvanceDialog(); // 台詞 3
         yield return null;
 
-        // 산타 등장
+        // サンタ登場
         audioSource.PlayOneShot(jumpSound);
         santaObject.position = new Vector3(10f, -1f, 0f);
         santaObject.gameObject.SetActive(true);
         Vector3 targetPosSanta = new Vector3(1.66f, -0.445f, 0f);
         yield return MoveParabolic(santaObject, targetPosSanta, 1.5f, 2.0f);
 
-        dialogManager.AdvanceDialog(); // 대사 4
+        dialogManager.AdvanceDialog(); // 台詞 4
         yield return null;
         yield return WaitForUserClick();
 
-        dialogManager.AdvanceDialog(); // 대사 5
+        dialogManager.AdvanceDialog(); // 台詞 5
         yield return null;
         yield return WaitForUserClick();
 
-        dialogManager.AdvanceDialog(); // 대사 6
+        dialogManager.AdvanceDialog(); // 台詞 6
         yield return null;
         yield return WaitForUserClick();
 
-        dialogManager.AdvanceDialog(); // 대사 7
+        dialogManager.AdvanceDialog(); // 台詞 7
         yield return null;
         yield return WaitForUserClick();
 
-        dialogManager.AdvanceDialog(); // 대사 8
+        dialogManager.AdvanceDialog(); // 台詞 8
         yield return null;
         yield return WaitForUserClick();
 
-        // 석탄 투척 및 타격
+        // 石炭の投げて当てる
         if (coalInstance != null) {
             audioSource.PlayOneShot(hitSound);
             coalInstance.gameObject.SetActive(true);
@@ -115,18 +119,18 @@ public class BossEndDIalog : MonoBehaviour {
             coalInstance.gameObject.SetActive(false);
         }
 
-        dialogManager.AdvanceDialog(); // 대사 9
+        dialogManager.AdvanceDialog(); // 台詞 9
         yield return null;
         yield return WaitForUserClick();
 
-        dialogManager.AdvanceDialog(); // 대사 10
+        dialogManager.AdvanceDialog(); // 台詞 10
         audioSource.PlayOneShot(bossDieSound);
         Vector3 bossLastPos = bossObject.position;
 
-        // 보스 소멸
+        // ボス消滅
         yield return BossDissolveEffect(bossObject, 2.0f);
 
-        // 종이 소환
+        // 紙を出す
         if (paperInstance != null) {
             paperInstance.gameObject.SetActive(true);
             paperInstance.transform.position = bossLastPos;
@@ -134,32 +138,31 @@ public class BossEndDIalog : MonoBehaviour {
             yield return ProjectileMove(paperInstance.transform, targetPosPaper, 1.0f, 360f);
         }
 
-        dialogManager.AdvanceDialog(); // 대사 11
+        dialogManager.AdvanceDialog(); // 台詞 11
         yield return null;
         yield return WaitForUserClick();
         yield return new WaitForSeconds(0.5f);
 
-        // 종이 UI 표시
+        // 紙UI表示
         if (paperShowPrefab != null) {
-            currentPaperInstance = Instantiate(paperShowPrefab, Vector3.zero, Quaternion.identity);
+            currentPaperInstance = Instantiate(paperShowPrefab, Vector3.zero, Quaternion.identity);
 
             if (uiCanvasTransform != null) {
-                // 선택된 canvas를 부모로 설정
-                currentPaperInstance.transform.SetParent(uiCanvasTransform, false);
-                // UI가 화면 중앙에 오도록 위치 재설정
+                currentPaperInstance.transform.SetParent(uiCanvasTransform, false);
+                // UIが画面のまん中にくるように位置を直す
                 currentPaperInstance.transform.localPosition = Vector3.zero;
             }
 
             yield return WaitForUserClick();
 
-            Destroy(currentPaperInstance);
+            Destroy(currentPaperInstance);
             currentPaperInstance = null;
-        }
+        }
 
-        dialogManager.AdvanceDialog(); // 대화 12
+        dialogManager.AdvanceDialog(); // 台詞 12
         yield return null;
 
-        // 종이 소멸
+        // 紙を消滅
         if (paperInstance != null) {
             audioSource.PlayOneShot(disappearSound);
             yield return DissolveSprite(paperInstance, 0.5f);
@@ -168,21 +171,21 @@ public class BossEndDIalog : MonoBehaviour {
 
         yield return WaitForUserClick();
 
-        // 대화 13번부터 자동 진행
+        // 台詞13番目から自動で進める
         dialogManager.isAutoAdvanceEnabled = true;
         dialogManager.AdvanceDialog();
 
-        // 대화 끝까지 자동 진행 대기
+        // 台詞が終わるまで待機
         while (dialogManager.IsDialogActive) {
             yield return null;
         }
 
-        Debug.Log(">> 시퀀스 완료 및 종료!");
+        Debug.Log(">> シーケンス完了および終了！");
         EndUI.gameObject.SetActive(true);
         DialogManager.OnDialogFinished?.Invoke();
     }
 
-    // 클릭 / space 대기
+    // クリックやスペースキーを待機
     private IEnumerator WaitForUserClick() {
         while (dialogManager.IsTyping) {
             yield return null;
@@ -190,7 +193,7 @@ public class BossEndDIalog : MonoBehaviour {
         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0));
     }
 
-    // 보스 피격효과
+    // ボスが攻撃をくらった時のエフェクト
     private IEnumerator HandleBossHit() {
         if (bossSpriteRenderer != null) {
             Color tempOriginalColor = bossSpriteRenderer.color;
@@ -200,7 +203,7 @@ public class BossEndDIalog : MonoBehaviour {
         }
     }
 
-    // 물체를 startPos → endPos 까지 포물선형태로 움직임
+    // 物をstartPosからendPosまで放物線で動かす
     private IEnumerator MoveParabolic(Transform target, Vector3 endPos, float duration, float heightFactor) {
         Vector3 startPos = target.position;
         float elapsed = 0f;
@@ -218,7 +221,7 @@ public class BossEndDIalog : MonoBehaviour {
         target.position = endPos;
     }
 
-    // 물체를 endPos까지 움직이면서 회전
+    // 物をendPosまで回しながら動かす
     private IEnumerator ProjectileMove(Transform target, Vector3 endPos, float duration, float rotationSpeedDegreesPerSec) {
         Vector3 startPos = target.position;
         float elapsed = 0f;
@@ -233,7 +236,7 @@ public class BossEndDIalog : MonoBehaviour {
         target.position = endPos;
     }
 
-    // 떨림과 함께 투명해지는 효과
+    // 揺れながら透明になるエフェクト
     private IEnumerator BossDissolveEffect(Transform target, float duration) {
         float elapsed = 0f;
         Vector3 originalPos = target.position;
@@ -260,7 +263,7 @@ public class BossEndDIalog : MonoBehaviour {
         target.gameObject.SetActive(false);
     }
 
-    // 투명해지는 효과
+    // 透明になるエフェクト
     private IEnumerator DissolveSprite(SpriteRenderer sprite, float duration) {
         float elapsed = 0f;
         Color startColor = sprite.color;

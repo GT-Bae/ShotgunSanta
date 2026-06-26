@@ -1,3 +1,7 @@
+/*
+ * プレイヤーにダメージを与えます
+ */
+
 using UnityEngine;
 
 public class GiveDamage : MonoBehaviour {

@@ -1,3 +1,7 @@
+/*
+ * プレイヤーが発射した弾丸を制御するクラス
+ */
+
 using UnityEngine;
 
 public class HandgunBulletController : MonoBehaviour {
@@ -6,7 +10,7 @@ public class HandgunBulletController : MonoBehaviour {
     private float currentSpeed;
     private Vector2 direction;
 
-    [Tooltip("총알이 자동으로 파괴되기까지의 시간")]
+    [Tooltip("弾丸が破壊されるまでの時間")]
     public float maxLifetime = 2f;
 
     void Awake() {
@@ -14,7 +18,7 @@ public class HandgunBulletController : MonoBehaviour {
         Destroy(gameObject, maxLifetime);
     }
 
-    // HandgunHandler에서 호출하여 총알을 발사
+    // HandgunHandlerから呼び出されて弾丸を発射
     public void Fire(Vector2 fireDirection, float speed) {
         direction = fireDirection;
         currentSpeed = speed;
@@ -24,10 +28,10 @@ public class HandgunBulletController : MonoBehaviour {
         }
     }
 
-    // 적과의 충돌 처리
+    // 敵との衝突処理
     private void OnTriggerEnter2D(Collider2D other) {
 
-        // 충돌한 객체에서 ITakeDamage 인터페이스를 가진 컴포넌트를 찾음
+        // 衝突したオブジェクトから ITakeDamage インターフェースを実装したコンポーネントを取得
         ITakeDamage damageReceiver = other.gameObject.GetComponent<ITakeDamage>();
 
         if (damageReceiver != null) {
