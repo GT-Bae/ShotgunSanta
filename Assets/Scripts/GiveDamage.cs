@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ShotgunEffectHandler : MonoBehaviour {
+public class GiveDamage : MonoBehaviour {
     public int damageAmount = 10;
 
     private void OnTriggerEnter2D(Collider2D other) {

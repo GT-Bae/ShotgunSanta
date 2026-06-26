@@ -13,8 +13,6 @@ public class BoomBoxExplosion : MonoBehaviour {
     [Tooltip("爆発時の被害範囲 (ワールド単位サイズ)")]
     [SerializeField] private float explosionRadius = 2.0f;
 
-    [Tooltip("爆発ダメージ量")]
-    [SerializeField] private int explosionDamage = 20;
 
     [Header("Movement Settings")]
     [Tooltip("プレイヤーを追跡する速度")]
@@ -93,11 +91,6 @@ public class BoomBoxExplosion : MonoBehaviour {
         if (boomEffectDamagePrefab != null) {
             boomDamageTrigger = Instantiate(boomEffectDamagePrefab, transform.position, Quaternion.identity);
 
-            // BoomEffectDamageにダメージ量を渡す
-            BoomEffectDamage damageScript = boomDamageTrigger.GetComponent<BoomEffectDamage>();
-            if (damageScript != null) {
-                damageScript.Initialize(explosionDamage);
-            }
             yield return new WaitForSeconds(damageActiveDuration);
 
             // BoomEffect削除
