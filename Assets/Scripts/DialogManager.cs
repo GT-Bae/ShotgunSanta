@@ -10,6 +10,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class DialogManager : MonoBehaviour {
     // 会話が完全に終了したときに外部へ通知するイベント
@@ -41,9 +43,9 @@ public class DialogManager : MonoBehaviour {
     // 現在タイピング中かどうかを外部へ知らせるプロパティ（外部シーケンスでの待機用に使用）
     public bool IsTyping => isTyping;
     [HideInInspector] public bool isAutoAdvanceEnabled = true;
+
     private struct DialogData {
         public int number;
-        public string character;
         public float xPos;
         public float yPos;
         public string dialogue;
@@ -168,6 +170,24 @@ public class DialogManager : MonoBehaviour {
             return;
         }
 
+        // 現在の言語設定（Locale）を取得
+        Locale activeLocale = LocalizationSettings.SelectedLocale;
+        if (activeLocale == null) {
+            Debug.LogError("SelectedLocale が取得できません。LocalizationSettingsを確認してください。");
+            return;
+        }
+
+        // 言語コード（"ko" や "ja"）に応じて読み込むCSVの列インデックスを決定
+        // csv形式: number(0), x(1), y(2), KO(3), JP(4)
+        int dialogueColumnIndex = 3; // デフォルトは韓国語(KO)
+        
+        string languageCode = activeLocale.Identifier.Code; // "ko", "ja" などが取得できる
+        if (languageCode.StartsWith("ja")) {
+            dialogueColumnIndex = 4; // 日本語(JP)
+        } else if (languageCode.StartsWith("ko")) {
+            dialogueColumnIndex = 3; // 韓国語(KO)
+        }
+
         try {
             string fileData = dialogCsvFile.text;
             string[] lines = fileData.Split('\n');
@@ -176,20 +196,23 @@ public class DialogManager : MonoBehaviour {
                 if (string.IsNullOrWhiteSpace(line)) continue;
                 string[] values = line.Split(',');
 
-                if (values.Length < 5) {
-                    Debug.LogWarning($"CSV 解析エラー: データ項目数が不足しています。（行: {line}）-> 5 項目必要");
+                // 必要最低限の項目数があるかチェック（最大インデックスが dialogueColumnIndex なのでそれ以上必要）
+                if (values.Length <= dialogueColumnIndex) {
+                    Debug.LogWarning($"CSV 解析エラー: データ項目数が不足しています。（行: {line}）-> 必要なインデックス: {dialogueColumnIndex}");
                     continue;
                 }
+
                 DialogData data = new DialogData();
                 data.number = int.Parse(values[0].Trim());
-                data.character = values[1].Trim();
-                data.xPos = float.Parse(values[2].Trim());
-                data.yPos = float.Parse(values[3].Trim());
-                // CSV の読み込み完了。合計 {dialogQueue.Count} 件の会話データをキューに追加しました。
-                data.dialogue = values[4].Trim().Replace("\"", "").Replace("\r", "");
+                data.xPos = float.Parse(values[1].Trim());
+                data.yPos = float.Parse(values[2].Trim());
+                
+                // 動的に決定したインデックスからセリフを取得
+                data.dialogue = values[dialogueColumnIndex].Trim().Replace("\"", "").Replace("\r", "");
+                
                 dialogQueue.Enqueue(data);
             }
-            Debug.Log($"CSV の読み込み完了。合計 {dialogQueue.Count} 件の会話データをキューに追加しました。");
+            Debug.Log($"CSV の読み込み完了（言語: {languageCode}）。合計 {dialogQueue.Count} 件の会話データをキューに追加しました。");
         } catch (System.Exception e) {
             Debug.LogError($"CSV ファイル解析中にエラーが発生しました: {e.Message}。CSV ファイル形式またはデータに誤りがあります。");
         }
@@ -215,7 +238,7 @@ public class DialogManager : MonoBehaviour {
             dialogText = currentTextBox.GetComponentInChildren<TextMeshProUGUI>();
 
             if (dialogText == null) {
-                Debug.LogError("����: textBoxPrefab���� TextMeshProUGUI�� ã�� �� �����ϴ�.");
+                Debug.LogError("textBoxPrefabからTextMeshProUGUI見つかりません");
                 Destroy(currentTextBox);
                 currentTextBox = null;
                 return;
