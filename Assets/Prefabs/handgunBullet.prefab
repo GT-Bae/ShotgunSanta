@@ -179,5 +179,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3be7b457d9dc4746b51b54416b76c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandgunBulletController
-  damage: 100
+  damage: 10
   maxLifetime: 2
