@@ -13,8 +13,9 @@ GameObject:
   - component: {fileID: 3974312375227188229}
   - component: {fileID: 1396554728581232559}
   - component: {fileID: 5842825768472751647}
-  - component: {fileID: 8202942209067573600}
   - component: {fileID: -3250506035988496617}
+  - component: {fileID: 3209069303686936498}
+  - component: {fileID: 6659646611907317165}
   m_Layer: 0
   m_Name: santaBag
   m_TagString: Untagged
@@ -39,6 +40,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5171945568130005848
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -84,6 +86,7 @@ SpriteRenderer:
   m_SortingLayerID: 538549301
   m_SortingLayer: 6
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: -3924710578394253363, guid: bda9c1119b5a87841a8314385b11630d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 1
@@ -93,7 +96,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!61 &3974312375227188229
 BoxCollider2D:
@@ -182,20 +184,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SantaBagMovement
   moveDuration: 0.5
   arrivalSoundClip: {fileID: 8300000, guid: 8e9ad75d2c3541f4b9cfddff53dfce47, type: 3}
---- !u!114 &8202942209067573600
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6225896442885136957}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d4eeaab99fd2c44d9e67cb0f159f7b2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SantaBagDamage
-  damageAmount: 30
-  damageDuration: 0.5
 --- !u!82 &-3250506035988496617
 AudioSource:
   m_ObjectHideFlags: 0
@@ -293,3 +281,38 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &3209069303686936498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6225896442885136957}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70b6a3716ff25064a8fe3bef73d7bb1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GiveDamage
+  damageAmount: 50
+--- !u!95 &6659646611907317165
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6225896442885136957}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: acadb0845ac746f4398a3bb5758bacb2, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

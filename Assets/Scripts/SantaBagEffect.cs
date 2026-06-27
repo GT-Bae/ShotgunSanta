@@ -9,8 +9,6 @@ public class SantaBagMovement : MonoBehaviour {
     private Vector3 targetPosition;
 
     [SerializeField] private float moveDuration = 0.5f;
-
-    private SantaBagDamage damageScript;
     private SpriteRenderer spriteRenderer;
     private bool isInitialized = false;
     [Header("Audio Settings")]
@@ -20,13 +18,8 @@ public class SantaBagMovement : MonoBehaviour {
     [SerializeField] private AudioClip arrivalSoundClip;
 
     private void Awake() {
-        damageScript = GetComponent<SantaBagDamage>();
         audioSource = GetComponent<AudioSource>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        if (damageScript == null) {
-            Debug.LogError("SantaBagDamage.csが見つかりません。");
-            enabled = false;
-        }
     }
 
     // BossPattern.csで使用。最終目標位置を設定し、移動を開始
@@ -70,10 +63,6 @@ public class SantaBagMovement : MonoBehaviour {
         transform.position = targetPosition;
         if (audioSource != null && arrivalSoundClip != null) {
             audioSource.PlayOneShot(arrivalSoundClip);
-        }
-        // 移動完了後にダメージトリガーを有効化
-        if (damageScript != null) {
-            damageScript.ActivateDamageTrigger();
         }
     }
 }

@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 4444436098752432945}
   - component: {fileID: 5050621676998433120}
   - component: {fileID: 4316619009035514896}
-  - component: {fileID: -1672585338078757684}
+  - component: {fileID: 8864392802163664119}
+  - component: {fileID: 924996120002273477}
   m_Layer: 0
   m_Name: snowEffect
   m_TagString: Untagged
@@ -36,6 +37,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5050621676998433120
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -81,6 +83,7 @@ SpriteRenderer:
   m_SortingLayerID: 538549301
   m_SortingLayer: 6
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 1679009276922096606, guid: 26b6b6347be90db46834eed663ddb671, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -90,7 +93,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!61 &4316619009035514896
 BoxCollider2D:
@@ -138,7 +140,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &-1672585338078757684
+--- !u!114 &8864392802163664119
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -147,8 +149,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 4976996932512483493}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68066c547cc20f44d9d09eace75c94e4, type: 3}
+  m_Script: {fileID: 11500000, guid: 70b6a3716ff25064a8fe3bef73d7bb1d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SnowEffectAttack
+  m_EditorClassIdentifier: Assembly-CSharp::GiveDamage
   damageAmount: 30
-  lifetime: 0.5
+--- !u!95 &924996120002273477
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4976996932512483493}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: dd48af9f26ee5664fbb61b1bf5962810, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
