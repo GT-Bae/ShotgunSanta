@@ -8,7 +8,7 @@
 * **Engine/Library** : ![Unity](https://img.shields.io/badge/Unity-100000?style=for-the-badge&logo=unity&logoColor=white)
 * **Tool** : ![Visual Studio Code](https://img.shields.io/badge/Visual_Studio_Code-0078D4?style=for-the-badge&logo=visual%20studio%20code&logoColor=white) ![Git](https://img.shields.io/badge/GIT-E44C30?style=for-the-badge&logo=git&logoColor=white)
 
-## 2.
+## 2. プロジェクト概要・素材クレジット
 | 項目 | 内容 |
 | :--- | :--- |
 |**制作期間**|2025-09-18 ~ 12-10 (83日, 大学3年生)|
