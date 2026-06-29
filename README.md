@@ -1,5 +1,5 @@
 # 散弾サンタ
-<img width="1912" height="1070" alt="image" src="https://github.com/user-attachments/assets/1074ff79-cc16-4fce-b1a9-6e1059ec15a8" />
+[<img width="1912" height="1070" alt="image" src="https://github.com/user-attachments/assets/1074ff79-cc16-4fce-b1a9-6e1059ec15a8" />](https://youtu.be/Pespx1I-Vzc)
 
 ---
 
